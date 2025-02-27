@@ -81,7 +81,7 @@ const Manager: React.FC = () => {
           </thead>
           <tbody>
             <tr>
-              <td className="py-3 px-5 border-1 border-gray-600 box-border">
+              <td className="py-3 px-5 min-w-xs border border-gray-600">
                 <a
                   href="https://www.google.com"
                   target="_blank"
@@ -91,7 +91,7 @@ const Manager: React.FC = () => {
                 </a>
                 <button
                   onClick={() => copyToClipboard("www.google.com", "site")}
-                  className="mt-1 float-right text-gray-400 hover:text-white cursor-pointer"
+                  className="text-gray-400 hover:text-white cursor-pointer float-right"
                 >
                   {copiedField === "site" ? (
                     <Check size={18} />
@@ -100,11 +100,11 @@ const Manager: React.FC = () => {
                   )}
                 </button>
               </td>
-              <td className="py-3 px-5 border-1 border-gray-600 box-border">
-                hira_haider
+              <td className="py-3 px-5 border border-gray-600 min-w-xs">
+                <span>hira_haider</span>
                 <button
                   onClick={() => copyToClipboard("hira_haider", "username")}
-                  className="mt-1 text-gray-400 hover:text-white cursor-pointer float-right"
+                  className="text-gray-400 hover:text-white cursor-pointer float-right"
                 >
                   {copiedField === "username" ? (
                     <Check size={18} />
@@ -113,11 +113,11 @@ const Manager: React.FC = () => {
                   )}
                 </button>
               </td>
-              <td className="py-3 pr-5 border border-gray-600">
-                <div className="relative">
+              <td className="py-3 px-5 border border-gray-600">
+                <div className="relative flex justify-center items-center space-x-2 min-w-xs">
                   <input
                     type={showPasswordTable ? "text" : "password"}
-                    className="outline-none border-none bg-transparent text-white text-center"
+                    className="outline-none border-none bg-transparent text-white text-center w-32 sm:w-40"
                     value="hirahaider@19"
                     readOnly
                   />

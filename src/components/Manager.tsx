@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Eye, EyeOff, Clipboard, Check } from "lucide-react";
+import { Eye, EyeOff, Clipboard, Check, Edit, Trash } from "lucide-react";
 
 const Manager: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -59,7 +59,7 @@ const Manager: React.FC = () => {
       </div>
 
       <div className="overflow-x-auto mx-5">
-        <table className="w-3/4 min-w-[500px] mx-auto my-5 text-gray-300 text-center border border-gray-600 rounded-lg shadow-lg">
+        <table className="w-5/6 min-w-[500px] mx-auto my-5 text-gray-300 text-center border border-gray-600 rounded-lg shadow-lg">
           <thead className="bg-gray-900 text-gray-200 uppercase">
             <tr>
               <th className="py-3 px-5 border-1 border-gray-600 box-border">
@@ -70,6 +70,12 @@ const Manager: React.FC = () => {
               </th>
               <th className="py-3 px-5 border-1 border-gray-600 box-border">
                 Password
+              </th>
+              <th className="py-3 px-5 border-1 border-gray-600 box-border">
+                Edit
+              </th>
+              <th className="py-3 px-5 border-1 border-gray-600 box-border">
+                Delete
               </th>
             </tr>
           </thead>
@@ -120,7 +126,11 @@ const Manager: React.FC = () => {
                     className="absolute right-10 text-gray-400 hover:text-gray-200 cursor-pointer"
                     onClick={() => setShowPasswordTable(!showPasswordTable)}
                   >
-                    {showPasswordTable ? <Eye size={18} /> : <EyeOff size={18} />}
+                    {showPasswordTable ? (
+                      <Eye size={18} />
+                    ) : (
+                      <EyeOff size={18} />
+                    )}
                   </button>
                   <button
                     onClick={() => copyToClipboard("hirahaider@19", "password")}
@@ -133,6 +143,16 @@ const Manager: React.FC = () => {
                     )}
                   </button>
                 </div>
+              </td>
+              <td className="py-3 pr-5 border border-gray-600">
+                <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
+                  <Edit size={18} />
+                </button>
+              </td>
+              <td className="py-3 pr-5 border border-gray-600">
+                <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
+                <Trash size={18} />
+                </button>
               </td>
             </tr>
           </tbody>

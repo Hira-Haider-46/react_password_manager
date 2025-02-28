@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Eye, EyeOff, Clipboard, Check, Edit, Trash } from "lucide-react";
+import { Eye, EyeOff, Clipboard, Check, Edit, Trash, Loader  } from "lucide-react";
 
 const Manager: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -10,6 +10,9 @@ const Manager: React.FC = () => {
   type Form = {site: string; username: string; password: string;};
   const [form, setForm] = useState<Form>({ site: "", username: "", password: "",});
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [loadingDelete, setLoadingDelete] = useState<string | null>(null);
+  const [loadingEdit, setLoadingEdit] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -43,20 +46,28 @@ const Manager: React.FC = () => {
       alert("Please fill all the fields with at least 3 characters");
       return;
     }
+    setLoading(true);
     const method = editingId ? "PUT" : "POST";
-
     await fetch("http://localhost:3000/", { method, headers: { "Content-Type": "application/json",},
       body: JSON.stringify(editingId ? { id: editingId, ...form } : form),
     });
-
     setForm({ site: "", username: "", password: "" });
     setEditingId(null);
+    setLoading(false);
   };
 
   const handleDeletePassword = async (id: string) => {
+    setLoadingDelete(id);
     await fetch("http://localhost:3000/", { method: "DELETE", headers: {"Content-Type": "application/json",},
-      body: JSON.stringify({ id }),
-    });
+      body: JSON.stringify({ id }),});
+      setLoadingDelete(null);
+  };
+
+  const handleEditPassword = async (pass : Password) => {
+    setLoadingEdit(pass._id); 
+    setEditingId(pass._id); 
+    setForm({ site: pass.site, username: pass.username, password: pass.password });
+    setLoadingEdit(null);
   };
 
   useEffect(() => {
@@ -69,9 +80,7 @@ const Manager: React.FC = () => {
 
       <div className="mx-auto pt-8 w-full text-center text-gray-300 font-medium">
         <h1 className="text-2xl sm:text-3xl md:text-4xl">Password Manager</h1>
-        <p className="text-sm sm:text-base lg:text-lg my-2 font-normal">
-          Your own Password Manager
-        </p>
+        <p className="text-sm sm:text-base lg:text-lg my-2 font-normal">Your own Password Manager</p>
 
         <div className="w-full sm:w-3/4 md:w-2/3 lg:w-1/2 p-6 sm:p-8 mx-auto">
           <input type="text" placeholder="Enter website URL" className="w-full outline-none rounded-2xl border-1 border-gray-500 px-5 py-3 mb-6 bg-transparent text-white placeholder-gray-400" onChange={handleChangeInput}
@@ -86,7 +95,7 @@ const Manager: React.FC = () => {
             </div>
           </div>
 
-          <button className="w-full sm:w-auto rounded-full outline-none px-7 py-3 border-1 border-gray-400 mt-6 sm:mt-10 cursor-pointer hover:font-bold duration-300" onClick={handleAddPassword}>{editingId ? "Update Password" : "Add Password"}</button>
+          <button className="w-full sm:w-auto rounded-full outline-none px-7 py-3 border-1 border-gray-400 mt-6 sm:mt-10 cursor-pointer hover:font-bold duration-300" onClick={handleAddPassword} disabled={loading}>{loading ? <Loader size={18} className="animate-spin"/> : editingId ? "Update Password" : "Add Password"}</button>
         </div>
       </div>
 
@@ -108,7 +117,7 @@ const Manager: React.FC = () => {
                 return (
                   <tr key={pass._id}>
                     <td className="py-3 px-5 min-w-xs border border-gray-600">
-                      <a href={`${pass.site}`} target="_blank" rel="noopener noreferrer">{pass.site}</a>
+                      <a href={`${pass.site}`} target="_blank">{pass.site}</a>
                       <button onClick={() => copyToClipboard(`${pass.site}`, "site")} className="text-gray-400 hover:text-white cursor-pointer float-right">{copiedField === "site" ? (<Check size={18} />
                         ) : (<Clipboard size={18} />)}</button>
                     </td>
@@ -124,10 +133,10 @@ const Manager: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3 pr-5 border border-gray-600">
-                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer" onClick={() => { setEditingId(pass._id); setForm({ site: pass.site, username: pass.username, password: pass.password }); }}><Edit size={18} /></button>
+                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer" onClick={() => handleEditPassword(pass)} disabled={loadingEdit === pass._id}>{loadingEdit === pass._id ? <Loader size={18} className="animate-spin"/> : <Edit size={18} />}</button>
                     </td>
                     <td className="py-3 pr-5 border border-gray-600">
-                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer" onClick={() => handleDeletePassword(pass._id)}><Trash size={18} /></button>
+                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer" onClick={() => handleDeletePassword(pass._id)} disabled={loadingDelete === pass._id}>{loadingDelete === pass._id ? <Loader size={18} className="animate-spin"/> : <Trash size={18} />}</button>
                     </td>
                   </tr>);})}
             </tbody>

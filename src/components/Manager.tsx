@@ -73,6 +73,18 @@ const Manager: React.FC = () => {
     setForm({ site: "", username: "", password: "" });
   };
 
+  const handleDeletePassword = async (id : string) => {
+    const confirmDelete = confirm("Are you sure you want to delete this password?");
+    if (!confirmDelete) return;
+    await fetch("http://localhost:3000/", {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({id}),
+    });
+  };
+
   useEffect(() => {
     getPasswords();
   }, [passwords]);
@@ -240,7 +252,7 @@ const Manager: React.FC = () => {
                       </button>
                     </td>
                     <td className="py-3 pr-5 border border-gray-600">
-                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
+                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer" onClick={() => handleDeletePassword(pass._id)}>
                         <Trash size={18} />
                       </button>
                     </td>

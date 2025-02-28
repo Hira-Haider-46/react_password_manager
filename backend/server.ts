@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import bodyParser from "body-parser";
 import cors from "cors";
 
@@ -32,8 +32,9 @@ app.post("/", async (req: Request, res: Response) => {
 });
 
 app.delete("/", async (req: Request, res: Response) => {
+  const {id} = req.body;
   const collection = db.collection("passwords");
-  const findResult = await collection.deleteOne(req.body);
+  const findResult = await collection.deleteOne({ _id: new ObjectId(id) });
   res.send({success: true, result: findResult});
 });
 

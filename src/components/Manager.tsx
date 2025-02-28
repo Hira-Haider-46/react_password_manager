@@ -3,7 +3,9 @@ import { Eye, EyeOff, Clipboard, Check, Edit, Trash } from "lucide-react";
 
 const Manager: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordTable, setShowPasswordTable] = useState(false);
+  const [showPasswordRows, setShowPasswordRows] = useState<{
+    [key: string]: boolean;
+  }>({});
   const [copiedField, setCopiedField] = useState<string | null>(null);
   type Password = {
     _id: string;
@@ -27,6 +29,13 @@ const Manager: React.FC = () => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  const togglePasswordVisibility = (id: string) => {
+    setShowPasswordRows((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
   };
 
   const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,7 +162,7 @@ const Manager: React.FC = () => {
               </tr>
             </thead>
             <tbody>
-              {passwords?.map((pass) => {
+              {passwords.map((pass) => {
                 return (
                   <tr key={pass._id}>
                     <td className="py-3 px-5 min-w-xs border border-gray-600">
@@ -193,7 +202,9 @@ const Manager: React.FC = () => {
                     <td className="py-3 px-5 border border-gray-600">
                       <div className="relative flex justify-center items-center space-x-2 min-w-xs">
                         <input
-                          type={showPasswordTable ? "text" : "password"}
+                          type={
+                            showPasswordRows[pass._id] ? "text" : "password"
+                          }
                           className="outline-none border-none bg-transparent text-white text-center w-32 sm:w-40"
                           value={pass.password}
                           readOnly
@@ -201,11 +212,9 @@ const Manager: React.FC = () => {
                         <button
                           type="button"
                           className="absolute right-10 text-gray-400 hover:text-gray-200 cursor-pointer"
-                          onClick={() =>
-                            setShowPasswordTable(!showPasswordTable)
-                          }
+                          onClick={() => togglePasswordVisibility(pass._id)}
                         >
-                          {showPasswordTable ? (
+                          {showPasswordRows[pass._id] ? (
                             <Eye size={18} />
                           ) : (
                             <EyeOff size={18} />

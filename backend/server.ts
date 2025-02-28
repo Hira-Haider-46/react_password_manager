@@ -41,10 +41,7 @@ app.delete("/", async (req: Request, res: Response) => {
 app.put("/", async (req: Request, res: Response) => {
   const { id, site, username, password } = req.body;
   const collection = db.collection("passwords");
-  const result = await collection.updateOne(
-    { _id: new ObjectId(id) },
-    { $set: { site, username, password } }
-  );
+  const result = await collection.updateOne({ _id: new ObjectId(id) },{ $set: { site, username, password } });
   res.send({ success: true, result: result });
 });
 

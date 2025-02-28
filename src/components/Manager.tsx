@@ -24,6 +24,7 @@ const Manager: React.FC = () => {
     username: "",
     password: "",
   });
+  const [editingId, setEditingId] = useState<string | null>(null);
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
@@ -63,25 +64,27 @@ const Manager: React.FC = () => {
       alert("Please fill all the fields with at least 3 characters");
       return;
     }
+    const method = editingId ? "PUT" : "POST";
+
     await fetch("http://localhost:3000/", {
-      method: "POST",
+      method,
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(form),
+      body: JSON.stringify(editingId ? { id: editingId, ...form } : form),
     });
+
     setForm({ site: "", username: "", password: "" });
+    setEditingId(null);
   };
 
-  const handleDeletePassword = async (id : string) => {
-    const confirmDelete = confirm("Are you sure you want to delete this password?");
-    if (!confirmDelete) return;
+  const handleDeletePassword = async (id: string) => {
     await fetch("http://localhost:3000/", {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({id}),
+      body: JSON.stringify({ id }),
     });
   };
 
@@ -142,7 +145,7 @@ const Manager: React.FC = () => {
             className="w-full sm:w-auto rounded-full outline-none px-7 py-3 border-1 border-gray-400 mt-6 sm:mt-10 cursor-pointer hover:font-bold duration-300"
             onClick={handleAddPassword}
           >
-            Add Password
+            {editingId ? "Update Password" : "Add Password"}
           </button>
         </div>
       </div>
@@ -247,12 +250,21 @@ const Manager: React.FC = () => {
                       </div>
                     </td>
                     <td className="py-3 pr-5 border border-gray-600">
-                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
+                      <button
+                        className="ml-5 text-gray-400 hover:text-white cursor-pointer"
+                        onClick={() => {
+                          setEditingId(pass._id);
+                          setForm({ site: pass.site, username: pass.username, password: pass.password });
+                        }}
+                      >
                         <Edit size={18} />
                       </button>
                     </td>
                     <td className="py-3 pr-5 border border-gray-600">
-                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer" onClick={() => handleDeletePassword(pass._id)}>
+                      <button
+                        className="ml-5 text-gray-400 hover:text-white cursor-pointer"
+                        onClick={() => handleDeletePassword(pass._id)}
+                      >
                         <Trash size={18} />
                       </button>
                     </td>

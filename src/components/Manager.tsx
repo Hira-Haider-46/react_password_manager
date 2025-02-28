@@ -1,16 +1,72 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Eye, EyeOff, Clipboard, Check, Edit, Trash } from "lucide-react";
 
 const Manager: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showPasswordTable, setShowPasswordTable] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
+  type Password = {
+    _id: string;
+    site: string;
+    username: string;
+    password: string;
+  };
+  const [passwords, setPasswords] = useState<Password[]>([]);
+  type Form = {
+    site: string;
+    username: string;
+    password: string;
+  };
+  const [form, setForm] = useState<Form>({
+    site: "",
+    username: "",
+    password: "",
+  });
 
   const copyToClipboard = (text: string, field: string) => {
     navigator.clipboard.writeText(text);
     setCopiedField(field);
     setTimeout(() => setCopiedField(null), 2000);
   };
+
+  const handleChangeInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm((prevForm) => ({
+      ...prevForm,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const getPasswords = async () => {
+    let res = await fetch("http://localhost:3000/");
+    let data = await res.json();
+    setPasswords(data);
+  };
+
+  const handleAddPassword = async () => {
+    if (
+      !form.site ||
+      !form.username ||
+      !form.password ||
+      form.site.length < 3 ||
+      form.password.length < 3 ||
+      form.username.length < 3
+    ) {
+      alert("Please fill all the fields with at least 3 characters");
+      return;
+    }
+    await fetch("http://localhost:3000/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(form),
+    });
+    setForm({ site: "", username: "", password: "" });
+  };
+
+  useEffect(() => {
+    getPasswords();
+  }, [passwords]);
 
   return (
     <>
@@ -27,6 +83,9 @@ const Manager: React.FC = () => {
             type="text"
             placeholder="Enter website URL"
             className="w-full outline-none rounded-2xl border-1 border-gray-500 px-5 py-3 mb-6 bg-transparent text-white placeholder-gray-400"
+            onChange={handleChangeInput}
+            value={form.site}
+            name="site"
           />
 
           <div className="flex flex-col sm:flex-row sm:space-x-4">
@@ -34,6 +93,9 @@ const Manager: React.FC = () => {
               type="text"
               placeholder="Enter username"
               className="w-full sm:w-3/5 outline-none rounded-2xl border-1 border-gray-500 px-5 py-3 bg-transparent text-white placeholder-gray-400 mb-4 sm:mb-0"
+              onChange={handleChangeInput}
+              value={form.username}
+              name="username"
             />
 
             <div className="relative w-full sm:w-2/5">
@@ -41,6 +103,9 @@ const Manager: React.FC = () => {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter password"
                 className="w-full outline-none rounded-2xl border-1 border-gray-500 px-5 py-3 pr-12 bg-transparent text-white placeholder-gray-400"
+                onChange={handleChangeInput}
+                value={form.password}
+                name="password"
               />
               <button
                 type="button"
@@ -52,111 +117,130 @@ const Manager: React.FC = () => {
             </div>
           </div>
 
-          <button className="w-full sm:w-auto rounded-full outline-none px-7 py-3 border-1 border-gray-400 mt-6 sm:mt-10 cursor-pointer hover:font-bold duration-300">
+          <button
+            className="w-full sm:w-auto rounded-full outline-none px-7 py-3 border-1 border-gray-400 mt-6 sm:mt-10 cursor-pointer hover:font-bold duration-300"
+            onClick={handleAddPassword}
+          >
             Add Password
           </button>
         </div>
       </div>
 
       <div className="overflow-x-auto mx-5">
-        <table className="w-5/6 min-w-[500px] mx-auto my-5 text-gray-300 text-center border border-gray-600 rounded-lg shadow-lg">
-          <thead className="bg-gray-900 text-gray-200 uppercase">
-            <tr>
-              <th className="py-3 px-5 border-1 border-gray-600 box-border">
-                Site
-              </th>
-              <th className="py-3 px-5 border-1 border-gray-600 box-border">
-                Username
-              </th>
-              <th className="py-3 px-5 border-1 border-gray-600 box-border">
-                Password
-              </th>
-              <th className="py-3 px-5 border-1 border-gray-600 box-border">
-                Edit
-              </th>
-              <th className="py-3 px-5 border-1 border-gray-600 box-border">
-                Delete
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td className="py-3 px-5 min-w-xs border border-gray-600">
-                <a
-                  href="https://www.google.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  www.google.com
-                </a>
-                <button
-                  onClick={() => copyToClipboard("www.google.com", "site")}
-                  className="text-gray-400 hover:text-white cursor-pointer float-right"
-                >
-                  {copiedField === "site" ? (
-                    <Check size={18} />
-                  ) : (
-                    <Clipboard size={18} />
-                  )}
-                </button>
-              </td>
-              <td className="py-3 px-5 border border-gray-600 min-w-xs">
-                <span>hira_haider</span>
-                <button
-                  onClick={() => copyToClipboard("hira_haider", "username")}
-                  className="text-gray-400 hover:text-white cursor-pointer float-right"
-                >
-                  {copiedField === "username" ? (
-                    <Check size={18} />
-                  ) : (
-                    <Clipboard size={18} />
-                  )}
-                </button>
-              </td>
-              <td className="py-3 px-5 border border-gray-600">
-                <div className="relative flex justify-center items-center space-x-2 min-w-xs">
-                  <input
-                    type={showPasswordTable ? "text" : "password"}
-                    className="outline-none border-none bg-transparent text-white text-center w-32 sm:w-40"
-                    value="hirahaider@19"
-                    readOnly
-                  />
-                  <button
-                    type="button"
-                    className="absolute right-10 text-gray-400 hover:text-gray-200 cursor-pointer"
-                    onClick={() => setShowPasswordTable(!showPasswordTable)}
-                  >
-                    {showPasswordTable ? (
-                      <Eye size={18} />
-                    ) : (
-                      <EyeOff size={18} />
-                    )}
-                  </button>
-                  <button
-                    onClick={() => copyToClipboard("hirahaider@19", "password")}
-                    className="absolute right-2 text-gray-400 hover:text-white cursor-pointer"
-                  >
-                    {copiedField === "password" ? (
-                      <Check size={18} />
-                    ) : (
-                      <Clipboard size={18} />
-                    )}
-                  </button>
-                </div>
-              </td>
-              <td className="py-3 pr-5 border border-gray-600">
-                <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
-                  <Edit size={18} />
-                </button>
-              </td>
-              <td className="py-3 pr-5 border border-gray-600">
-                <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
-                <Trash size={18} />
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        {passwords.length === 0 ? (
+          <p className="text-gray-300 text-center text-xl">
+            No passwords found
+          </p>
+        ) : (
+          <table className="w-5/6 min-w-[500px] mx-auto my-5 text-gray-300 text-center border border-gray-600 rounded-lg shadow-lg">
+            <thead className="bg-gray-900 text-gray-200 uppercase">
+              <tr>
+                <th className="py-3 px-5 border-1 border-gray-600 box-border">
+                  Site
+                </th>
+                <th className="py-3 px-5 border-1 border-gray-600 box-border">
+                  Username
+                </th>
+                <th className="py-3 px-5 border-1 border-gray-600 box-border">
+                  Password
+                </th>
+                <th className="py-3 px-5 border-1 border-gray-600 box-border">
+                  Edit
+                </th>
+                <th className="py-3 px-5 border-1 border-gray-600 box-border">
+                  Delete
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {passwords?.map((pass) => {
+                return (
+                  <tr key={pass._id}>
+                    <td className="py-3 px-5 min-w-xs border border-gray-600">
+                      <a
+                        href={`${pass.site}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        {pass.site}
+                      </a>
+                      <button
+                        onClick={() => copyToClipboard(`${pass.site}`, "site")}
+                        className="text-gray-400 hover:text-white cursor-pointer float-right"
+                      >
+                        {copiedField === "site" ? (
+                          <Check size={18} />
+                        ) : (
+                          <Clipboard size={18} />
+                        )}
+                      </button>
+                    </td>
+                    <td className="py-3 px-5 border border-gray-600 min-w-xs">
+                      <span>{pass.username}</span>
+                      <button
+                        onClick={() =>
+                          copyToClipboard(`${pass.username}`, "username")
+                        }
+                        className="text-gray-400 hover:text-white cursor-pointer float-right"
+                      >
+                        {copiedField === "username" ? (
+                          <Check size={18} />
+                        ) : (
+                          <Clipboard size={18} />
+                        )}
+                      </button>
+                    </td>
+                    <td className="py-3 px-5 border border-gray-600">
+                      <div className="relative flex justify-center items-center space-x-2 min-w-xs">
+                        <input
+                          type={showPasswordTable ? "text" : "password"}
+                          className="outline-none border-none bg-transparent text-white text-center w-32 sm:w-40"
+                          value={pass.password}
+                          readOnly
+                        />
+                        <button
+                          type="button"
+                          className="absolute right-10 text-gray-400 hover:text-gray-200 cursor-pointer"
+                          onClick={() =>
+                            setShowPasswordTable(!showPasswordTable)
+                          }
+                        >
+                          {showPasswordTable ? (
+                            <Eye size={18} />
+                          ) : (
+                            <EyeOff size={18} />
+                          )}
+                        </button>
+                        <button
+                          onClick={() =>
+                            copyToClipboard(`${pass.password}`, "password")
+                          }
+                          className="absolute right-2 text-gray-400 hover:text-white cursor-pointer"
+                        >
+                          {copiedField === "password" ? (
+                            <Check size={18} />
+                          ) : (
+                            <Clipboard size={18} />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                    <td className="py-3 pr-5 border border-gray-600">
+                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
+                        <Edit size={18} />
+                      </button>
+                    </td>
+                    <td className="py-3 pr-5 border border-gray-600">
+                      <button className="ml-5 text-gray-400 hover:text-white cursor-pointer">
+                        <Trash size={18} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
     </>
   );

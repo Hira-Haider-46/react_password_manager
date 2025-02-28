@@ -2,12 +2,14 @@ import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 import { MongoClient } from "mongodb";
 import bodyParser from "body-parser";
+import cors from "cors";
 
 dotenv.config();
 const app = express();
 const port: number = 3000;
 
 app.use(bodyParser.json());
+app.use(cors());
 
 const url = "mongodb://localhost:27017";
 const client = new MongoClient(url);
